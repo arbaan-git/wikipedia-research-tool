@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from bs4 import BeautifulSoup
 import time
 
 webdriver_path = Path(__file__).resolve().parent/"chromedriver"
@@ -19,17 +20,23 @@ driver.get("https://www.wikipedia.org/")
 search_box = driver.find_element(By.ID, "searchInput")
 search_box.send_keys(topic_user_input, Keys.ENTER)
 
-WebDriverWait(driver, 3).until(
-    EC.presence_of_element_located((By.CSS_SELECTOR, "#mw-content-text .mw-parser-output > *"))
+WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located((By.ID, "mw-content-text"))
 )
-elements = driver.find_elements(By.CSS_SELECTOR,"#mw-content-text .mw-parser-output > *")
 
-for element in elements:
-    if element.get_attribute("class") == "mw-heading mw-heading2":
+html = driver.page_source
+soup = BeautifulSoup(html, "html.parser")
+
+for sup in soup.find_all("sup", class_= "reference"):
+    sup.decompose()
+intro_div_children = soup.find(id = "mw-content-text").find(class_ = "mw-parser-output").children
+for element in intro_div_children:
+    if not hasattr(element, "get"):
+        continue
+    if "mw-heading" in element.get("class", []) :
         break
-    elif element.tag_name == "p":
+    if element.name == "p":
         print(element.text.strip())
-
 time.sleep(10)
 
 driver.quit()
