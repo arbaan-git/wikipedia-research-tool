@@ -29,14 +29,19 @@ soup = BeautifulSoup(html, "html.parser")
 
 for sup in soup.find_all("sup", class_= "reference"):
     sup.decompose()
+
 intro_div_children = soup.find(id = "mw-content-text").find(class_ = "mw-parser-output").children
-for element in intro_div_children:
-    if not hasattr(element, "get"):
-        continue
-    if "mw-heading" in element.get("class", []) :
-        break
-    if element.name == "p":
-        print(element.text.strip())
-time.sleep(10)
+
+with open("notes.md", "w+") as f:
+    pass
+
+with open("notes.md", "a+") as f:
+    for element in intro_div_children:
+        if not hasattr(element, "get"):
+            continue
+        if "mw-heading" in element.get("class", []) :
+            break
+        if element.name == "p":
+            f.write(element.text.strip())
 
 driver.quit()
